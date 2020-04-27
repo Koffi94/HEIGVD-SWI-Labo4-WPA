@@ -94,7 +94,7 @@ Exécution du script `sudo python3 scairodump.py -i wlp2s0mon -s "MON-250206" -f
 
 
 
-Notes : Le script est adapté pour attaquer un réseau WPA, n'ayant qu'un réseau WPA2 à disposition, nous n'avons pas pu réaliser de "screen" d'un cassage réussit.
+Notes : Le script n'est pas 100% fonctionnel car le MIC avec le mot de passe correct ne correspond pas au MIC recherché. Pour des raisons de temps nous nous sommes arrêté là. Cependant, la deauthentification suivit du bruteforce de la passphrase fonctionne correctement.
 
 ## Quelques éléments à considérer :
 
