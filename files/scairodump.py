@@ -99,7 +99,7 @@ def extract_data(pkt_list):
     print ("Client Nonce: ", SNonce,"\n")
     print ("MIC (to test): ", Mic4,"\n")
 
-    crack_pass(pkt_list[3], Mic4)
+    crack_pass(pkt_list, Mic4)
 
 
 #####################################
