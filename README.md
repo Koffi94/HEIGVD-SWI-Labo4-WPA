@@ -92,8 +92,6 @@ Exécution du script `sudo python3 scairodump.py -i wlp2s0mon -s "MON-250206" -f
 
 ![](./files/img/p3_2.png)
 
-
-
 Notes : Le script fonctionne correctement si la la fonction de dé-authentification n'est pas activée. Lorsqu'on l'utilise, des 0 remplace le champs MIC . Il est possible que ceci soit dû au fait que lorsque le client se fait déconnecter, il se reconnecte avec un handshake "simplifié" différent et donc l'extraction du MIC du quatrième paquet du handshake ne contient pas les bonnes valeurs. Pour des raisons de temps, nous n'avons pas creusé plus loin.
 
 ## Quelques éléments à considérer :
