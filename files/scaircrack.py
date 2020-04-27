@@ -141,6 +141,7 @@ passwords_file = open('./10k_most_common_passwords.txt','r')
 passwords = passwords_file.readlines()
 passphrase_ret = "Not found"
 mic_to_test = a2b_hex("36eef66540fa801ceee2fea9b7929b40fdb0abaa").hex()
+data = bytes(wpa[8]['EAPOL'])[:77] + b'\x00' * 22
 
 
 print ("\nCracking WPA Passphrase")
@@ -156,13 +157,20 @@ for psw in passwords :
     #expand pmk to obtain PTK
     ptk = customPRF512(pmk,str.encode(A),B)
 
+    #Check if it's MD5 or SHA1 with the KeyDescriptorVersion
+    kdv = int.from_bytes(wpa[8].load[0:1], byteorder='big')
+
     #calculate MIC over EAPOL payload (Michael)- The ptk is, in fact, KCK|KEK|TK|MICK
-    mic = hmac.new(ptk[0:16],data,hashlib.sha1)
+    if kdv == 2:
+        mic = hmac.new(ptk[0:16],data,hashlib.sha1).hexdigest()
+    else:
+        mic = hmac.new(ptk[0:16],data,hashlib.md5).hexdigest()  
 
     print ("Passphrase tested : ",psw)
+    print (mic)
         
     #Compare the MICs
-    if hmac.compare_digest(mic.hexdigest(), mic_to_test) :
+    if hmac.compare_digest(mic, mic_to_test) :
         print ("\nPassphrase found !\n")
         passphrase_ret = psw
         break

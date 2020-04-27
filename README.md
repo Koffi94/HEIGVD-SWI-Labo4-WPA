@@ -84,17 +84,17 @@ Modifier votre script de cracking pour qu’il soit capable de faire les mêmes 
 
 Exécution du script `sudo python3 scairodump.py -i wlp2s0mon -s "MON-250206" -f "10k_most_common_passwords.txt" -d`:
 
-![](./files/img/p3_2.png)
+![](./files/img/p3_1.png)
 
 
 
 Exécution du script `sudo python3 scairodump.py -i wlp2s0mon -s "MON-250206" -f "10k_most_common_passwords.txt"`:
 
-![](./files/img/p3_1.png)
+![](./files/img/p3_2.png)
 
 
 
-Notes : Le script est adapté pour attaquer un réseau WPA, n'ayant qu'un réseau WPA2 à disposition, nous n'avons pas pu réaliser de "screen" d'un cassage réussit.
+Notes : Le script fonctionne correctement si la la fonction de dé-authentification n'est pas activée. Lorsqu'on l'utilise, des 0 remplace le champs MIC . Il est possible que ceci soit dû au fait que lorsque le client se fait déconnecter, il se reconnecte avec un handshake "simplifié" différent et donc l'extraction du MIC du quatrième paquet du handshake ne contient pas les bonnes valeurs. Pour des raisons de temps, nous n'avons pas creusé plus loin.
 
 ## Quelques éléments à considérer :
 
