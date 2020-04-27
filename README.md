@@ -42,6 +42,14 @@ Dans cette première partie, vous allez récupérer le script **Python3** [wpa_k
 - __Modifier le script__ pour qu’il récupère automatiquement, à partir de la capture, les valeurs qui se trouvent actuellement codées en dur (```ssid```, ```APmac```, ```Clientmac```, nonces…) 
 
 
+
+Exécution du script `wpa_key_derivation_mod.py` :
+
+![](./files/img/p1_1.png)
+
+Note : Le MIC est récupéré dans le script suivant.
+
+
 ### 2. Scaircrack (aircrack basé sur Scapy)
 
 Aircrack utilise le quatrième message du 4-way handshake pour tester les passphrases contenues dans un dictionnaire. Ce message ne contient pas de données chiffrées mais il est authentifié avec un MIC qui peut être exploité comme « oracle » pour tester des clés différentes obtenues des passphrases du dictionnaire.
@@ -58,11 +66,35 @@ Utilisant le script [wpa_key_derivation.py](https://github.com/arubinst/HEIGVD-S
    - Différents &rarr; Essayer avec une nouvelle passphrase
 
 
+
+Exécution du script `scaircrack.py` :
+
+![](./files/img/p2_1.png)
+
+![](./files/img/p2_2.png)
+
+
 ### 3. Scairodump (Challenge)
 
 **Note : un délai supplémentaire peut être accordé pour ce dernier exercice - contactez-nous si jamais. Le reste du labo est à rendre à la date indiquée**
 
 Modifier votre script de cracking pour qu’il soit capable de faire les mêmes opérations que le script précédant mais sans utiliser une capture Wireshark. Pour cela, il faudra donc sniffer un 4-way handshake utilisant Scapy et refaire toutes les opérations de la partie 2 pour obtenir la passphrase. Le script doit implémenter la possibilité de déauthentifier un client pour stimuler le 4-way handshake. Cette déauthentification doit aussi être implémentée avec Scapy.
+
+
+
+Exécution du script `sudo python3 scairodump.py -i wlp2s0mon -s "MON-250206" -f "10k_most_common_passwords.txt" -d`:
+
+![](./files/img/p3_2.png)
+
+
+
+Exécution du script `sudo python3 scairodump.py -i wlp2s0mon -s "MON-250206" -f "10k_most_common_passwords.txt"`:
+
+![](./files/img/p3_1.png)
+
+
+
+Notes : Le script est adapté pour attaquer un réseau WPA, n'ayant qu'un réseau WPA2 à disposition, nous n'avons pas pu réaliser de "screen" d'un cassage réussit.
 
 ## Quelques éléments à considérer :
 
